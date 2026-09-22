@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lena Consultancy - Doğrulanmış Türkiye Orman Yangınları KDS</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        html, body, #map { width: 100%; height: 100%; margin: 0; padding: 0; background-color: #0f0f0f; font-family: Arial, sans-serif; }
+        .kds-header { position: absolute; top: 15px; left: 55px; z-index: 1000; background: rgba(15,15,15,0.9); color: #fff; padding: 8px 16px; border-radius: 6px; border: 1px solid #444; font-size: 13px; }
+        .legend { position: absolute; bottom: 30px; right: 20px; z-index: 1000; background: rgba(15,15,15,0.9); color: #fff; padding: 10px 14px; border-radius: 6px; border: 1px solid #444; font-size: 11px; line-height: 18px; }
+    </style>
+</head>
+<body>
+    <div class="kds-header">🌿 <b>Lena Consultancy</b> | Doğrulanmış Türkiye Orman Yangınları & Meteoroloji Katmanı</div>
+    <div class="legend">
+        <b>🌲 Orman Rejimi Yangın Analizi</b><br>
+        <span style="color:#ff0000;">●</span> FRP &gt; 15 MW (Yüksek Şiddetli Orman Yangını)<br>
+        <span style="color:#ff7800;">●</span> FRP 5 - 15 MW (Aktif Orman / Örtü Yangını)<br>
+        <small style="color:#aaa;">Anız ve Tarımsal Odaklar Filtrelenmiştir</small>
+    </div>
+    <div id="map"></div>
+
+    <script>
+        var map = L.map('map', { center: [38.8, 35.0], zoom: 6 });
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
+
+        var thermalData = [{"lat": 36.06, "lon": 36.91, "frp": 8.9}, {"lat": 36.31, "lon": 36.3, "frp": 19.8}, {"lat": 36.31, "lon": 36.53, "frp": 6.3}, {"lat": 36.32, "lon": 36.3, "frp": 19.8}, {"lat": 36.32, "lon": 36.31, "frp": 12.0}, {"lat": 36.32, "lon": 36.32, "frp": 6.2}, {"lat": 36.35, "lon": 36.47, "frp": 9.1}, {"lat": 36.35, "lon": 36.52, "frp": 5.1}, {"lat": 36.38, "lon": 36.39, "frp": 73.6}, {"lat": 36.52, "lon": 36.41, "frp": 20.1}, {"lat": 36.52, "lon": 36.42, "frp": 38.5}, {"lat": 36.67, "lon": 35.54, "frp": 14.4}, {"lat": 36.73, "lon": 35.52, "frp": 11.5}, {"lat": 36.73, "lon": 36.21, "frp": 6.0}, {"lat": 36.75, "lon": 36.96, "frp": 79.2}, {"lat": 36.78, "lon": 35.18, "frp": 28.6}, {"lat": 36.78, "lon": 35.19, "frp": 25.6}, {"lat": 36.79, "lon": 35.12, "frp": 5.4}, {"lat": 36.79, "lon": 35.18, "frp": 24.0}, {"lat": 36.79, "lon": 35.19, "frp": 24.0}, {"lat": 36.8, "lon": 41.68, "frp": 39.2}, {"lat": 36.81, "lon": 40.95, "frp": 49.0}, {"lat": 36.81, "lon": 41.67, "frp": 83.8}, {"lat": 36.83, "lon": 42.35, "frp": 27.9}, {"lat": 36.84, "lon": 40.2, "frp": 58.8}, {"lat": 36.84, "lon": 42.4, "frp": 30.4}, {"lat": 36.85, "lon": 40.19, "frp": 35.8}, {"lat": 36.85, "lon": 40.22, "frp": 122.3}, {"lat": 36.85, "lon": 40.23, "frp": 115.7}, {"lat": 36.88, "lon": 35.22, "frp": 5.7}, {"lat": 36.89, "lon": 41.0, "frp": 75.0}, {"lat": 36.89, "lon": 41.01, "frp": 28.1}, {"lat": 36.9, "lon": 41.0, "frp": 30.2}, {"lat": 36.9, "lon": 41.51, "frp": 33.8}, {"lat": 36.91, "lon": 42.77, "frp": 29.6}, {"lat": 36.92, "lon": 42.17, "frp": 39.3}, {"lat": 36.92, "lon": 42.77, "frp": 29.6}, {"lat": 36.93, "lon": 35.52, "frp": 13.2}, {"lat": 36.93, "lon": 42.16, "frp": 38.5}, {"lat": 36.94, "lon": 35.86, "frp": 7.3}, {"lat": 36.97, "lon": 35.4, "frp": 5.0}, {"lat": 37.06, "lon": 36.04, "frp": 8.1}, {"lat": 37.06, "lon": 36.05, "frp": 6.8}, {"lat": 37.07, "lon": 35.8, "frp": 8.9}, {"lat": 37.08, "lon": 36.06, "frp": 14.4}, {"lat": 37.11, "lon": 35.9, "frp": 7.6}, {"lat": 37.12, "lon": 35.9, "frp": 17.7}, {"lat": 37.12, "lon": 35.91, "frp": 16.8}, {"lat": 37.14, "lon": 40.33, "frp": 25.4}, {"lat": 37.18, "lon": 35.97, "frp": 31.5}, {"lat": 37.18, "lon": 35.99, "frp": 5.4}, {"lat": 37.21, "lon": 35.78, "frp": 8.0}, {"lat": 37.22, "lon": 35.83, "frp": 9.0}, {"lat": 37.24, "lon": 35.98, "frp": 9.0}, {"lat": 37.25, "lon": 35.98, "frp": 7.2}, {"lat": 37.25, "lon": 35.99, "frp": 6.3}, {"lat": 37.25, "lon": 42.27, "frp": 26.3}, {"lat": 37.25, "lon": 42.28, "frp": 26.3}, {"lat": 37.26, "lon": 35.81, "frp": 6.4}, {"lat": 37.26, "lon": 35.82, "frp": 7.1}, {"lat": 37.27, "lon": 35.81, "frp": 7.1}, {"lat": 37.37, "lon": 42.34, "frp": 26.6}, {"lat": 37.51, "lon": 39.33, "frp": 27.7}, {"lat": 37.51, "lon": 39.63, "frp": 33.3}, {"lat": 37.61, "lon": 31.79, "frp": 5.4}, {"lat": 37.61, "lon": 31.81, "frp": 9.7}, {"lat": 37.64, "lon": 39.08, "frp": 80.8}, {"lat": 37.71, "lon": 31.77, "frp": 5.5}, {"lat": 37.77, "lon": 31.73, "frp": 12.4}, {"lat": 37.77, "lon": 31.74, "frp": 35.5}, {"lat": 37.77, "lon": 31.75, "frp": 40.5}, {"lat": 37.77, "lon": 31.8, "frp": 13.0}, {"lat": 37.77, "lon": 31.81, "frp": 15.4}, {"lat": 37.82, "lon": 31.7, "frp": 6.7}, {"lat": 37.84, "lon": 31.77, "frp": 8.9}, {"lat": 37.85, "lon": 31.59, "frp": 5.3}, {"lat": 37.85, "lon": 31.74, "frp": 12.0}, {"lat": 37.85, "lon": 31.77, "frp": 32.5}, {"lat": 37.86, "lon": 31.59, "frp": 12.6}, {"lat": 37.86, "lon": 31.6, "frp": 27.0}, {"lat": 37.86, "lon": 31.61, "frp": 15.7}, {"lat": 37.86, "lon": 31.62, "frp": 12.5}, {"lat": 37.87, "lon": 31.56, "frp": 9.1}, {"lat": 37.87, "lon": 31.61, "frp": 12.2}, {"lat": 37.87, "lon": 31.62, "frp": 8.6}, {"lat": 37.87, "lon": 31.65, "frp": 13.4}, {"lat": 37.87, "lon": 31.66, "frp": 14.4}, {"lat": 37.87, "lon": 31.67, "frp": 17.7}, {"lat": 37.88, "lon": 31.63, "frp": 5.5}, {"lat": 37.88, "lon": 31.67, "frp": 14.7}, {"lat": 37.88, "lon": 31.68, "frp": 10.2}, {"lat": 37.89, "lon": 31.63, "frp": 5.5}, {"lat": 37.89, "lon": 31.64, "frp": 14.4}, {"lat": 37.91, "lon": 31.62, "frp": 11.6}, {"lat": 37.95, "lon": 34.0, "frp": 5.7}, {"lat": 37.96, "lon": 34.01, "frp": 6.7}, {"lat": 37.96, "lon": 40.98, "frp": 33.1}, {"lat": 37.96, "lon": 40.99, "frp": 29.8}, {"lat": 37.97, "lon": 40.98, "frp": 33.1}, {"lat": 38.1, "lon": 40.57, "frp": 88.4}, {"lat": 38.42, "lon": 31.73, "frp": 24.6}, {"lat": 38.47, "lon": 31.48, "frp": 13.1}, {"lat": 38.48, "lon": 31.48, "frp": 7.3}, {"lat": 38.49, "lon": 31.5, "frp": 24.7}, {"lat": 38.57, "lon": 29.32, "frp": 9.7}, {"lat": 38.58, "lon": 31.59, "frp": 33.8}, {"lat": 38.58, "lon": 31.6, "frp": 25.6}, {"lat": 38.59, "lon": 31.34, "frp": 8.7}, {"lat": 38.59, "lon": 31.35, "frp": 20.6}, {"lat": 38.59, "lon": 31.36, "frp": 15.0}, {"lat": 38.6, "lon": 31.34, "frp": 18.6}, {"lat": 38.6, "lon": 31.35, "frp": 12.6}, {"lat": 38.6, "lon": 31.36, "frp": 10.6}, {"lat": 38.61, "lon": 36.11, "frp": 6.0}, {"lat": 38.61, "lon": 36.12, "frp": 8.3}, {"lat": 38.65, "lon": 39.1, "frp": 12.1}, {"lat": 38.83, "lon": 36.01, "frp": 14.3}, {"lat": 38.84, "lon": 35.2, "frp": 31.5}, {"lat": 38.92, "lon": 36.76, "frp": 15.1}, {"lat": 38.95, "lon": 32.86, "frp": 53.9}, {"lat": 38.96, "lon": 31.91, "frp": 23.3}, {"lat": 38.97, "lon": 31.92, "frp": 20.5}, {"lat": 38.97, "lon": 36.86, "frp": 5.5}, {"lat": 39.0, "lon": 31.99, "frp": 36.4}, {"lat": 39.0, "lon": 32.01, "frp": 21.1}, {"lat": 39.1, "lon": 31.86, "frp": 33.3}, {"lat": 39.23, "lon": 31.16, "frp": 14.8}, {"lat": 39.36, "lon": 33.64, "frp": 28.4}, {"lat": 39.36, "lon": 33.65, "frp": 25.9}, {"lat": 39.4, "lon": 31.3, "frp": 5.1}, {"lat": 39.41, "lon": 31.3, "frp": 14.5}, {"lat": 39.42, "lon": 33.45, "frp": 24.0}, {"lat": 39.44, "lon": 33.8, "frp": 22.6}, {"lat": 39.44, "lon": 33.81, "frp": 25.3}, {"lat": 39.44, "lon": 33.82, "frp": 21.5}, {"lat": 39.49, "lon": 33.83, "frp": 22.7}, {"lat": 39.52, "lon": 34.26, "frp": 23.1}, {"lat": 39.63, "lon": 35.56, "frp": 16.4}, {"lat": 39.64, "lon": 35.55, "frp": 6.1}, {"lat": 39.64, "lon": 35.56, "frp": 26.9}, {"lat": 39.67, "lon": 27.6, "frp": 8.8}, {"lat": 39.67, "lon": 40.24, "frp": 10.6}, {"lat": 39.68, "lon": 27.6, "frp": 12.7}, {"lat": 39.69, "lon": 30.76, "frp": 5.9}, {"lat": 39.71, "lon": 31.08, "frp": 5.7}, {"lat": 39.81, "lon": 30.92, "frp": 8.9}, {"lat": 39.86, "lon": 30.93, "frp": 7.5}, {"lat": 39.87, "lon": 30.93, "frp": 7.5}, {"lat": 40.05, "lon": 34.93, "frp": 20.9}, {"lat": 40.05, "lon": 34.94, "frp": 26.8}, {"lat": 40.06, "lon": 34.93, "frp": 10.0}, {"lat": 40.07, "lon": 34.97, "frp": 5.5}, {"lat": 40.08, "lon": 34.92, "frp": 8.3}, {"lat": 40.08, "lon": 34.96, "frp": 8.5}, {"lat": 40.18, "lon": 34.72, "frp": 6.2}, {"lat": 40.18, "lon": 34.73, "frp": 10.9}, {"lat": 40.18, "lon": 34.75, "frp": 44.5}, {"lat": 40.25, "lon": 35.1, "frp": 6.6}, {"lat": 40.4, "lon": 34.24, "frp": 48.5}, {"lat": 40.4, "lon": 34.25, "frp": 41.7}, {"lat": 40.4, "lon": 34.26, "frp": 12.9}, {"lat": 40.43, "lon": 34.26, "frp": 5.0}, {"lat": 40.55, "lon": 34.09, "frp": 10.3}, {"lat": 40.55, "lon": 34.1, "frp": 5.5}, {"lat": 40.56, "lon": 34.27, "frp": 6.3}, {"lat": 40.56, "lon": 34.28, "frp": 8.9}, {"lat": 40.66, "lon": 35.6, "frp": 5.1}, {"lat": 40.79, "lon": 35.55, "frp": 5.0}, {"lat": 40.85, "lon": 35.34, "frp": 7.0}, {"lat": 40.96, "lon": 35.77, "frp": 9.3}, {"lat": 40.98, "lon": 35.72, "frp": 5.8}, {"lat": 41.01, "lon": 26.75, "frp": 22.4}, {"lat": 41.02, "lon": 26.75, "frp": 8.3}, {"lat": 41.16, "lon": 26.93, "frp": 12.5}, {"lat": 41.24, "lon": 36.47, "frp": 7.3}, {"lat": 41.38, "lon": 27.66, "frp": 20.4}, {"lat": 41.38, "lon": 27.67, "frp": 6.4}, {"lat": 41.39, "lon": 27.66, "frp": 8.3}, {"lat": 41.39, "lon": 27.67, "frp": 19.4}, {"lat": 41.53, "lon": 36.02, "frp": 7.0}, {"lat": 41.76, "lon": 26.99, "frp": 7.3}];
+
+        thermalData.forEach(function(pt) {
+            var color = pt.frp > 15 ? "#ff0000" : "#ff7800";
+            var radius = pt.frp > 15 ? 6.5 : 4.5;
+
+            var marker = L.circleMarker([pt.lat, pt.lon], {
+                radius: radius,
+                fillColor: color,
+                color: color,
+                weight: 1.2,
+                opacity: 0.9,
+                fillOpacity: 0.85
+            }).addTo(map);
+
+            var initialPopup =
+                "<div style='font-family:Arial; font-size:11px; color:#222; width:210px;'>" +
+                "<b style='color:" + color + "; font-size:12px;'>🔥 Türkiye Orman Yangın Odağı</b><br>" +
+                "<b>📍 Konum:</b> " + pt.lat + "°N, " + pt.lon + "°E<br>" +
+                "<hr style='margin:4px 0; border-color:#ccc;'>" +
+                "<b>🔥 Yangın Gücü (FRP):</b> " + pt.frp + " MW<br>" +
+                "<b>🌡️ Sıcaklık:</b> ⏳ Tıklayınca Yükleniyor...<br>" +
+                "<b>💧 Bağıl Nem:</b> ⏳ Tıklayınca Yükleniyor...<br>" +
+                "<b>💨 Rüzgar Hızı:</b> ⏳ Tıklayınca Yükleniyor...<br>" +
+                "<b>🧭 Rüzgar Yönü:</b> ⏳ Tıklayınca Yükleniyor..." +
+                "</div>";
+
+            marker.bindPopup(initialPopup);
+
+            var loaded = false;
+            var windLine = null;
+
+            marker.on('click', function() {
+                if (!loaded) {
+                    var wUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + pt.lat + "&longitude=" + pt.lon + "&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m";
+
+                    fetch(wUrl)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data && data.current) {
+                                loaded = true;
+                                var c = data.current;
+
+                                var updatedPopup =
+                                    "<div style='font-family:Arial; font-size:11px; color:#222; width:210px;'>" +
+                                    "<b style='color:" + color + "; font-size:12px;'>🔥 Türkiye Orman Yangın Odağı</b><br>" +
+                                    "<b>📍 Konum:</b> " + pt.lat + "°N, " + pt.lon + "°E<br>" +
+                                    "<hr style='margin:4px 0; border-color:#ccc;'>" +
+                                    "<b>🔥 Yangın Gücü (FRP):</b> " + pt.frp + " MW<br>" +
+                                    "<b>🌡️ Sıcaklık:</b> " + c.temperature_2m + " °C<br>" +
+                                    "<b>💧 Bağıl Nem:</b> %" + c.relative_humidity_2m + "<br>" +
+                                    "<b>💨 Rüzgar Hızı:</b> " + c.wind_speed_10m + " km/s<br>" +
+                                    "<b>🧭 Rüzgar Yönü:</b> " + c.wind_direction_10m + "°" +
+                                    "</div>";
+
+                                marker.getPopup().setContent(updatedPopup);
+
+                                if (c.wind_direction_10m !== undefined && !windLine) {
+                                    var rad = c.wind_direction_10m * (Math.PI / 180);
+                                    var endLat = pt.lat - (0.025 * Math.cos(rad));
+                                    var endLon = pt.lon - (0.025 * Math.sin(rad));
+
+                                    windLine = L.polyline([[pt.lat, pt.lon], [endLat, endLon]], {
+                                        color: color,
+                                        weight: 2,
+                                        opacity: 0.85
+                                    }).addTo(map);
+                                }
+                            }
+                        });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
