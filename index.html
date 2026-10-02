@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lena Consultancy - Doğrulanmış Türkiye Orman Yangınları KDS</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        html, body, #map { width: 100%; height: 100%; margin: 0; padding: 0; background-color: #0f0f0f; font-family: Arial, sans-serif; }
+        .kds-header { position: absolute; top: 15px; left: 55px; z-index: 1000; background: rgba(15,15,15,0.9); color: #fff; padding: 8px 16px; border-radius: 6px; border: 1px solid #444; font-size: 13px; }
+        .legend { position: absolute; bottom: 30px; right: 20px; z-index: 1000; background: rgba(15,15,15,0.9); color: #fff; padding: 10px 14px; border-radius: 6px; border: 1px solid #444; font-size: 11px; line-height: 18px; }
+    </style>
+</head>
+<body>
+    <div class="kds-header">🌿 <b>Lena Consultancy</b> | Doğrulanmış Türkiye Orman Yangınları & Meteoroloji Katmanı</div>
+    <div class="legend">
+        <b>🌲 Orman Rejimi Yangın Analizi</b><br>
+        <span style="color:#ff0000;">●</span> FRP &gt; 15 MW (Yüksek Şiddetli Orman Yangını)<br>
+        <span style="color:#ff7800;">●</span> FRP 5 - 15 MW (Aktif Orman / Örtü Yangını)<br>
+        <small style="color:#aaa;">Anız ve Tarımsal Odaklar Filtrelenmiştir</small>
+    </div>
+    <div id="map"></div>
+
+    <script>
+        var map = L.map('map', { center: [38.8, 35.0], zoom: 6 });
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
+
+        var thermalData = [{"lat": 36.53, "lon": 36.46, "frp": 12.7}, {"lat": 36.86, "lon": 41.9, "frp": 29.4}, {"lat": 36.87, "lon": 42.79, "frp": 46.6}, {"lat": 36.89, "lon": 40.47, "frp": 26.5}, {"lat": 36.94, "lon": 42.66, "frp": 26.0}, {"lat": 36.95, "lon": 42.66, "frp": 34.0}, {"lat": 37.87, "lon": 32.78, "frp": 5.5}, {"lat": 37.97, "lon": 40.48, "frp": 59.3}, {"lat": 38.05, "lon": 40.34, "frp": 45.0}, {"lat": 38.05, "lon": 40.35, "frp": 38.6}, {"lat": 38.07, "lon": 40.07, "frp": 32.8}, {"lat": 38.09, "lon": 40.38, "frp": 30.1}, {"lat": 38.54, "lon": 29.25, "frp": 5.2}, {"lat": 39.13, "lon": 27.42, "frp": 6.5}, {"lat": 39.13, "lon": 27.43, "frp": 7.0}, {"lat": 40.08, "lon": 32.05, "frp": 6.9}, {"lat": 40.44, "lon": 34.17, "frp": 57.2}, {"lat": 40.62, "lon": 26.51, "frp": 5.4}, {"lat": 40.63, "lon": 26.51, "frp": 12.2}, {"lat": 40.82, "lon": 27.08, "frp": 21.8}, {"lat": 40.82, "lon": 27.09, "frp": 21.8}, {"lat": 40.83, "lon": 27.09, "frp": 8.9}, {"lat": 41.04, "lon": 27.8, "frp": 5.1}, {"lat": 41.08, "lon": 26.7, "frp": 5.3}, {"lat": 41.24, "lon": 36.47, "frp": 5.4}, {"lat": 41.55, "lon": 26.79, "frp": 9.2}, {"lat": 41.88, "lon": 26.88, "frp": 6.3}, {"lat": 41.96, "lon": 26.02, "frp": 17.1}, {"lat": 41.96, "lon": 26.03, "frp": 13.1}, {"lat": 41.97, "lon": 26.03, "frp": 13.1}];
+
+        thermalData.forEach(function(pt) {
+            var color = pt.frp > 15 ? "#ff0000" : "#ff7800";
+            var radius = pt.frp > 15 ? 6.5 : 4.5;
+
+            var marker = L.circleMarker([pt.lat, pt.lon], {
+                radius: radius,
+                fillColor: color,
+                color: color,
+                weight: 1.2,
+                opacity: 0.9,
+                fillOpacity: 0.85
+            }).addTo(map);
+
+            var initialPopup =
+                "<div style='font-family:Arial; font-size:11px; color:#222; width:210px;'>" +
+                "<b style='color:" + color + "; font-size:12px;'>🔥 Türkiye Orman Yangın Odağı</b><br>" +
+                "<b>📍 Konum:</b> " + pt.lat + "°N, " + pt.lon + "°E<br>" +
+                "<hr style='margin:4px 0; border-color:#ccc;'>" +
+                "<b>🔥 Yangın Gücü (FRP):</b> " + pt.frp + " MW<br>" +
+                "<b>🌡️ Sıcaklık:</b> ⏳ Tıklayınca Yükleniyor...<br>" +
+                "<b>💧 Bağıl Nem:</b> ⏳ Tıklayınca Yükleniyor...<br>" +
+                "<b>💨 Rüzgar Hızı:</b> ⏳ Tıklayınca Yükleniyor...<br>" +
+                "<b>🧭 Rüzgar Yönü:</b> ⏳ Tıklayınca Yükleniyor..." +
+                "</div>";
+
+            marker.bindPopup(initialPopup);
+
+            var loaded = false;
+            var windLine = null;
+
+            marker.on('click', function() {
+                if (!loaded) {
+                    var wUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + pt.lat + "&longitude=" + pt.lon + "&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m";
+
+                    fetch(wUrl)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data && data.current) {
+                                loaded = true;
+                                var c = data.current;
+
+                                var updatedPopup =
+                                    "<div style='font-family:Arial; font-size:11px; color:#222; width:210px;'>" +
+                                    "<b style='color:" + color + "; font-size:12px;'>🔥 Türkiye Orman Yangın Odağı</b><br>" +
+                                    "<b>📍 Konum:</b> " + pt.lat + "°N, " + pt.lon + "°E<br>" +
+                                    "<hr style='margin:4px 0; border-color:#ccc;'>" +
+                                    "<b>🔥 Yangın Gücü (FRP):</b> " + pt.frp + " MW<br>" +
+                                    "<b>🌡️ Sıcaklık:</b> " + c.temperature_2m + " °C<br>" +
+                                    "<b>💧 Bağıl Nem:</b> %" + c.relative_humidity_2m + "<br>" +
+                                    "<b>💨 Rüzgar Hızı:</b> " + c.wind_speed_10m + " km/s<br>" +
+                                    "<b>🧭 Rüzgar Yönü:</b> " + c.wind_direction_10m + "°" +
+                                    "</div>";
+
+                                marker.getPopup().setContent(updatedPopup);
+
+                                if (c.wind_direction_10m !== undefined && !windLine) {
+                                    var rad = c.wind_direction_10m * (Math.PI / 180);
+                                    var endLat = pt.lat - (0.025 * Math.cos(rad));
+                                    var endLon = pt.lon - (0.025 * Math.sin(rad));
+
+                                    windLine = L.polyline([[pt.lat, pt.lon], [endLat, endLon]], {
+                                        color: color,
+                                        weight: 2,
+                                        opacity: 0.85
+                                    }).addTo(map);
+                                }
+                            }
+                        });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
